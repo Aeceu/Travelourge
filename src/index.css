@@ -85,6 +85,3 @@ body {
   overflow: hidden;
   scroll-behavior: smooth;
 }
-::-webkit-scrollbar {
-  display: none;
-}

@@ -1,6 +1,6 @@
-import Header from "./components/Header/Header";
-import List from "./components/List/List";
-import Map from "./components/Map/Map";
+import Header from "./components/Header";
+import List from "./components/List";
+import Map from "./components/Map";
 // import PlaceDetails from "./components/PlaceDetails/PlaceDetails";
 import { useEffect, useState } from "react";
 import { getPlacesData } from "@/api/index";
@@ -27,6 +27,7 @@ export default function App() {
     undefined
   );
   const [bounds, setBounds] = useState<BoundsProps>();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -40,11 +41,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (bounds)
-      getPlacesData({ ne: bounds.ne, sw: bounds.sw }).then((data) => {
-        setPlaces(data);
-        console.log(data);
-      });
+    try {
+      setLoading(true);
+      if (bounds)
+        getPlacesData({ ne: bounds.ne, sw: bounds.sw })
+          .then((data) => {
+            setPlaces(data);
+          })
+          .then(() => setLoading(false));
+    } catch (error) {
+      console.log(error);
+    }
   }, [coordinates, bounds]);
 
   return (
@@ -52,11 +59,12 @@ export default function App() {
       <Header />
       <div className="h-[calc(100vh-50px)] flex justify-between">
         <div className="w-1/4">
-          <List places={places} />
+          <List places={places} loading={loading} />
         </div>
         <div className="w-3/4 flex items-center p-4 ">
           {coordinates && (
             <Map
+              places={places}
               setCoordinates={setCoordinates}
               setBounds={setBounds}
               coordinates={coordinates}
